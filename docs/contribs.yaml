@@ -10,7 +10,7 @@ info:
     ## We welcome pull requests!<br/>
     Yes, this may come as a shock to you, but if you believe that the information provided in these pages is wrong
     or in some form lacking, you ara welcome to send us a pull request with your own corrections. <br/>
-    To do so, please go to our **github** repository and fork our project.<br/>
+    To do so, please go to our **[github](https://github.com/GreenfieldTech/dev.cloudonix.io)** repository and fork our project.<br/>
     ### Submitting a pull request is simple<br/>
     Once you had forked the project to your personal repository, you are welcome to submit a pull request via the
     project repository repository page. Should your pull request prove valid, it may be approved as is - or we may
@@ -18,6 +18,3 @@ info:
     ### We follow swagger<br/>
     Documentation contributions may be provided as YAML files, that conform to the Swagger specification. Please head
     over to [Swagger.io](http://swagger.io) for additional information about the Swagger specification.
-consumes:
-produces:
-paths:
