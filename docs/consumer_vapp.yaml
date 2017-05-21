@@ -1,0 +1,673 @@
+swagger: '2.0'
+info:
+  title: Vapp Consumer API
+  description: |
+    The Vapp Consumer API operates between a Vapp server and the remote billing/provisioning system. Its main purpose is
+    to provide Authorization and Accounting services, for the Cloudonix.io platform subscribers, providers (carriers) and
+    other interconnected services.
+    <br/><br/>
+    A possible work flow for the API shall be as the following:<br/>
+
+      1. `/call/state/{session_id}/NEW_SESSION` - Indicate a new session is now starting
+      2. `/call/authorize/outbound/{session_id}` - A call is trying to leave a mobile device and receive services, authorize
+      this request or reject it
+      3. `/call/state/{session_id}/RINGING` - Call is ringing at the remote end
+      4. `/call/state/{session_id}/ANSWER` - Remote party had answered the call
+      5. `/call/cdr/{session_id}` - Call detail records for billing purposes
+    <br/><br/>
+
+    The `/call/ivr` method is used for activating the internal IVR handler, capable of building various IVR flows, without the
+    neeed to provide any internal platform development.
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /call/authorize/outbound/{session_id}:
+    post:
+      summary: |
+        Authorize a mobile originated call for services
+      description: |
+        Query the remote management system to authorize the current mobile
+        originated call to receive services. The objective is to authorize the
+        call, classify it and provide additional information for processing.
+        <br/>
+        When a call originated from a remote mobile application, it must first
+        be authorized for services. Depending on your usage, authorization
+        factors may vary (financial, services, profile, etc). The information
+        provided to Cloudonix basically indicated how the outbound call should
+        be handled and how to pass it to the respective carriers.
+
+        ## A sample result may be the following:
+
+        ```json
+          {
+          "calltype": "external",
+          "numbers": [
+            "12127773456"
+            ],
+          "caller_id": "972123456789",
+          "recording": 1,
+          "recording_url": "http://my.remote.server.upload.url",
+          "lcr": [
+            {
+              "prefix": "9999",
+              "host": "192.168.100.1",
+              "port": "5060",
+              "name": "carrier_1",
+              "code": "carrier_1",
+              "ppm": 0.04
+            },
+            {
+              "prefix": "9999",
+              "host": "192.168.100.1",
+              "port": "5060",
+              "name": "carrier_1",
+              "code": "carrier_1",
+              "ppm": 0.04
+            }
+            ]
+          }
+        ```
+
+        ## Why is `numbers` and array, and not a string?
+        If **`calltype`** equals **`internal`**, a list of possible endpoints may be provided. Internal endpoints are dialled accordingly to the **`policy`** variable. For internal call routing, the following sample shoud be referred.
+
+        <br/>
+        ```json
+          {
+          "calltype": "internal",
+          "policy": "ringall",
+          "numbers": [
+            "12127773456",
+            "12127777777"
+            ],
+          "caller_id": "972123456789",
+          "recording": 1,
+          "calllimit": 1234
+          "recording_url": "http://my.remote.server.upload.url",
+          }
+        ```
+        ## What are `service` calls?
+        When a call should be routed to a service, this indicates that the call is handled by a special service (eg. Voicemail).
+        The following example should be referred to.
+        <br/>
+        ```json
+          {
+          "calltype": "service",
+          "numbers": [
+            "12127773456"
+            ],
+          "caller_id": "972123456789",
+          "recording": 1,
+          "recording_url": "http://my.remote.server.upload.url",
+          "calllimit": 1234
+          "lcr": [
+            {
+              "prefix": "",
+              "host": "192.168.100.1",
+              "port": "5060",
+              "name": "service_voicemail",
+              "code": "service_voicemail",
+              "ppm": 0.00
+            },
+          }
+        ```
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "session_id"
+          in: "path"
+          description: "A unique session ID, identifying the call at the platform level. Session IDs are unique across the entire Cloudonix platform."
+          required: true
+          type: "string"
+          format: "string"
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              subscriber:
+                description: "subscriber ID"
+                type: string
+                format: string
+              destination:
+                type: string
+                description: The number that was dialled by the mobile application (an outbound call)
+                format: string
+              handler_id:
+                type: string
+                description: The identified of the Vapp server currently serving this request
+                format: string
+          required: true
+      responses:
+        200:
+          description: Call had been authorized for MO services.
+          schema:
+            type: object
+            properties:
+              calltype:
+                type: string
+                enum:
+                  - internal
+                  - external
+                  - service
+              policy:
+                type: string
+                enum:
+                  - ringall
+                  - hunt
+              numbers:
+                type: array
+                items:
+                  type: string
+              caller_id:
+                type: string
+                description: A new caller ID to present to the destination as
+                  the origin of the call.
+              recording:
+                type: integer
+                description: Should this call be recorded.
+              recording_url:
+                type: string
+                description: If the call was recorded, where should the
+                  recording be uploaded to (currently, only S3 is supported).
+              lcr:
+                type: array
+                description: An array of possible termination points. Each
+                  termination point is represented by its own object.
+                items:
+                  type: object
+                  properties:
+                    prefix:
+                      type: string
+                      format: string
+                    host:
+                      type: string
+                      format: string
+                    port:
+                      type: string
+                      format: string
+                    name:
+                      type: string
+                      format: string
+                    code:
+                      type: string
+                      format: string
+                    ppm:
+                      type: number
+                      format: double
+              calllimit:
+                type: integer
+                format: integer
+                description: How long should the maximum allowed call be?
+        500:
+          description: Unexpected error
+        404:
+          description: Not Found
+        403:
+          description: User not authorized
+      tags:
+        - VAPP CONSUMER
+  /call/authorize/inbound/{session_id}:
+    post:
+      summary: |
+        Authorize an inbound call from a carrier to an assigned DID number
+      description: |
+        When a call is intercepted by the Vapp server, it will query the management system for authorization of that call and actionable data for processing. Depending on the configuration of the DID number, one of the below responses should be produced:
+        <br/>
+        ## Examples Responses
+        #### Route the call to a SIP endpoint (mobile application or hardware phone)
+        ```json
+          {
+          "calltype": "internal",
+          "endpoints": [
+            "12127773456@subscribers.gateway:5060",
+            "12127777777@subscribers.gateway:5060"
+            ],
+          "policy": "ringall",
+          "caller_id": "972123456789",
+          "recording": 1,
+          "recording_url": "http://my.remote.server.upload.url",
+          "intro_music_url": "http://my.music.url/music_file.wav",
+          "intro_music_loop": 3,
+          "timeout": 120,
+          "forward": {
+            "status": false,
+            "all": "",
+            "busy": "2127773456@subscribers.gateway:5060",
+            "noanswer": "2127773456@subscribers.gateway:5060"
+          },
+          "calllimit": 1234,
+          }
+        ```
+
+        **Notice:** Pay attention that `endpoints` contains a list of possible endpoints, not numbers. Endpoints shall be based upon the endpoint username and the endpoints assigned SIP registration proxy.
+
+        <br/>
+        #### Route the call to an IVR endpoint
+
+        ```json
+          {
+          "calltype": "ivr",
+          "endpoints": [
+            "12127773456"
+            ],
+          "caller_id": "972123456789"
+          }
+        ```
+        **Notice:** An IVR endpoint indicates the Vapp server that the IVR application should be invoked, using the IVR access number indicated by the index0 of the `endpoints` array.
+
+        #### Route the call to an internal application endpoint
+
+        ```json
+          {
+          "calltype": "application",
+          "endpoints": [
+            "some_applicaiton_name"
+            ],
+          "caller_id": "972123456789"
+          }
+        ```
+        **Notice:** An application endpoint activates a Vapp builtin application.
+
+        #### Route the call to an external application endpoint
+
+        ```json
+          {
+          "calltype": "externalapp",
+          "endpoints": [
+            "accessnumber@externalapp.yourdomain.com"
+            ],
+          "caller_id": "972123456789"
+          }
+        ```
+
+        **Notice:** An external application endpoint activates an application via dialing out to a specific SIP server.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "session_id"
+          in: "path"
+          description: "A unique session ID, identifying the call at the platform level. Session IDs are unique across the entire Cloudonix platform."
+          required: true
+          type: "string"
+          format: "string"
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              inbound_did:
+                description: "subscriber ID"
+                type: "string"
+                format: "string"
+              handler_id:
+                type: string
+                description: The identified of the Vapp server currently serving this request
+                format: string
+          required: true
+      responses:
+        200:
+          description: Call had been authorized for MO services.
+          schema:
+            type: object
+            properties:
+              calltype:
+                type: string
+                enum:
+                  - internal
+                  - ivr
+                  - application
+                  - externalapp
+              policy:
+                type: string
+                enum:
+                  - ringall
+                  - hunt
+              endpoints:
+                type: array
+                items:
+                  type: string
+              caller_id:
+                type: string
+                description: A new caller ID to present to the destination as
+                  the origin of the call.
+              recording:
+                type: integer
+                description: Should this call be recorded.
+              recording_url:
+                type: string
+                description: If the call was recorded, where should the
+                  recording be uploaded to (currently, only S3 is supported).
+              intro_music_url:
+                type: string
+                description: If the call should be preambled with an audio file, eg. a personal greeting.
+              intro_music_loop:
+                type: string
+                description: Number of times to play the `intro_music_url` file
+              timeout:
+                type: number
+                format: int32
+                description: How long shall we try to reach the remote endpoints
+              calllimit:
+                type: integer
+                format: integer
+                description: How long should the maximum allowed call be?
+              forward:
+                description: Call forwarding information, as required
+                type: object
+                properties:
+                  status:
+                    type: boolean
+                    description: Is call forwarding enabled or not?
+                  busy:
+                    type: string
+                    format: string
+                    description: Where should be the call be forwarded, if all routing options are busy
+                  noanswer:
+                    type: string
+                    format: string
+                    description: Where should be the call be forwarded, if all routing options are noanswer
+                  all:
+                     type: string
+                     format: string
+                     description: Where should be the call be forwarded, regardless of any destination setup or attempt
+        500:
+          description: Unexpected error
+        404:
+          description: Not Found
+        403:
+          description: User not authorized
+      tags:
+        - VAPP CONSUMER
+  /call/state/{session_id}/{state}:
+    put:
+      summary: |
+        Notify the current state of the call, as it traverses the Vapp server
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "session_id"
+          in: "path"
+          description: "The call session ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "state"
+          in: "path"
+          description: "The current call state"
+          required: true
+          type: "string"
+          enum:
+            - PREDIAL
+            - DIALING
+            - CONNECTED
+            - COMPLETED
+            - ERROR
+      responses:
+        202:
+          description: State reported successfully.
+        500:
+          description: Unexpected error
+        404:
+          description: Not Found
+        403:
+          description: User not authorized
+      tags:
+        - VAPP CONSUMER
+  /call/recording/{session_id}:
+    post:
+      summary: |
+       Post a recording file to the management system for additional processing
+      description: |
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - name: "session_id"
+          in: "path"
+          description: "The call session ID"
+          required: true
+          type: "string"
+          format: "string"
+      responses:
+        200:
+          description: Artifact uploaded successfully and queued for processing
+          schema:
+            type: object
+            properties:
+              artifact_id:
+                type: number
+                format: integer
+                description: ID of the uploaded artifact
+        500:
+          description: Unexpected error
+        404:
+          description: Not Found
+        403:
+          description: User not authorized
+      tags:
+        - VAPP CONSUMER
+  /call/cdr/{session_id}:
+    post:
+      summary: |
+        Report a calls' CDR for the call indicated by session_id
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "session_id"
+          in: "path"
+          description: "A unique session ID, identifying the call at the platform level. Session IDs are unique across the entire Cloudonix platform."
+          required: true
+          type: "string"
+          format: "string"
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              subscriber:
+                description: "subscriber ID"
+                type: string
+                format: string
+              destination:
+                type: string
+                description: The number that was dialled by the mobile application (an outbound call)
+                format: string
+              handler_id:
+                type: string
+                description: The identified of the Vapp server currently serving this request
+                format: string
+              termination_data:
+                type: object
+                properties:
+                  prefix:
+                    type: string
+                    format: string
+                  host:
+                    type: string
+                    format: string
+                  port:
+                    type: string
+                    format: string
+                  name:
+                    type: string
+                    format: string
+                  code:
+                    type: string
+                    format: string
+                  ppm:
+                    type: number
+                    format: double
+              timestamp_start:
+                type: number
+                format: int32
+                description: Call start timestamp in EPOCH format
+              duration:
+                type: number
+                format: int32
+                description: Duration of call, from start to finish
+              billable:
+                type: number
+                format: int32
+                description: Billable second - Actual audio traversed duration
+              dispostion:
+                type: string
+                description: Billable second - Actual audio traversed duration
+                enum:
+                  - ANSWER
+                  - BUSY
+                  - NOANSWER
+                  - CONGESTION
+                  - FAILED
+          required: true
+      responses:
+        202:
+          description: CDR Report completed
+        500:
+          description: Unexpected error
+        404:
+          description: Not Found
+        403:
+          description: User not authorized
+      tags:
+        - VAPP CONSUMER
+  /ivr/{session_id}/id/{ivr_endpoint}:
+    get:
+      summary: |
+        Playback an IVR menu to the calling user, as designated by the `ivr_endpoint` designation
+      description: |
+        The IVR mechanism provides a means of building customized customer experiences, based upon pre-recorded IVR messages and
+        pre-defined logic set. The result shall contain an IVR object, built from the `ivr_menu` options, as detailed below:
+        <br/>
+        # `menu_option: dial`
+        Ring a single or multiple SIP endpoints from the IVR menu.
+        ```
+          "menu_data": {
+            "endpoints": [
+              "12127773456@subscribers.gateway:5060",
+              "12127777777@subscribers.gateway:5060"
+            ],
+            "policy": "ringall"
+          }
+        ```
+        or
+        ```
+          "menu_data": {
+            "endpoints": [
+              "12127773456@subscribers.gateway:5060",
+              "12127777777@subscribers.gateway:5060"
+            ],
+            "policy": "hunt"
+          }
+        ```
+        # `menu_option: playback`
+        Playback a file or a set of files from remote URLs, then return to the IVR main menu.
+        ```
+          "menu_data": {
+            "remote_file_url": [
+              "http://some.url/file1.wav",
+              "http://some.url/file2.wav",
+              "http://some.url/file3.wav",
+              "http://some.url/file4.wav"
+            ]
+          }
+        ```
+        # `menu_option: capture`
+        Playback a file or a set of files from remote URLs, then report back the DTMF to the callback URL.
+        After playback, the IVR will return to the main menu.
+        ```
+          "menu_data": {
+            "remote_file_url": [
+              "http://some.url/file1.wav",
+              "http://some.url/file2.wav",
+              "http://some.url/file3.wav",
+              "http://some.url/file4.wav"
+            ],
+            "callback_url": "http://my.remote.callback.url"
+          }
+        ```
+        # `menu_option: hangup`
+        Playback a file or set of files, then disconnect the call.
+        ```
+          "menu_data": {
+            "remote_file_url": [
+              "http://some.url/file1.wav",
+              "http://some.url/file2.wav",
+              "http://some.url/file3.wav",
+              "http://some.url/file4.wav"
+            ]
+          }
+        ```
+        <br/>
+      produces:
+        - application/json
+      parameters:
+        - name: "session_id"
+          in: "path"
+          description: "The call session ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "ivr_endpoint"
+          in: "path"
+          description: "The IVR Endpoint designation"
+          required: true
+          type: "string"
+          format: "string"
+      responses:
+        200:
+          description: Artifact uploaded successfully and queued for processing
+          schema:
+            type: object
+            properties:
+              ivr_prompt_url:
+                type: string
+                format: string
+                description: A URL pointing to the IVRs playback file
+              ivr_prompt_loop:
+                type: number
+                format: int32
+                description: In case of no valid input, how many times should the IVR repeat itself, before hanging up the call.
+              ivr_timeout:
+                type: number
+                format: int32
+                description: How long should we wait for a response from the user, after the prompt had been played
+              ivr_menu:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    menu_key:
+                      type: number
+                      format: int32
+                      description: A number between 0 and 9, representing the menu key number
+                    menu_option:
+                      type: string
+                      enum:
+                        - dial
+                        - playback
+                        - capture
+                        - hangup
+                    menu_data:
+                      type: string
+                      description: |
+                        The `menu_data` should be completed with the information as appearing in the method descriptino above.
+        500:
+          description: Unexpected error
+        404:
+          description: Not Found
+        403:
+          description: User not authorized
+      tags:
+        - VAPP CONSUMER

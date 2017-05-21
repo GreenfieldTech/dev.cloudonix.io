@@ -1,0 +1,1664 @@
+swagger: '2.0'
+info:
+  title: Proposed User Agent Middleware API
+  description: |
+    The User Agent Middleware (UAM) illustarates a proposed API scheme, between a mobile application and a possible
+    customer provided management backend.
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /auth:
+    post:
+      summary: |
+        Authorize my application to work with the remote User Agent Middleware API
+      description: |
+        All requests from the mobile application to the User Agent Middleware API should be pre-authorized. Authorization shall be based upon a JWT interface (www.jwt.io).
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: |
+          schema:
+            type: object
+            properties:
+              subscriber_login:
+                type: string
+                description: The subscribers login details (eg. MSISDN)
+              subscriber_password:
+                type: string
+                description: The subscribers password
+          required:
+            true
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: A response object, describing the information obtained from the platform management system.
+          schema:
+            type: object
+            properties:
+              sip_credentials:
+                type: array
+                description: An array of server objects, to enable fail over and remote registration alternatives
+                items:
+                  type: object
+                  description: An object describing SIP registration data
+                  properties:
+                    server:
+                      type: string
+                      description: The SIP server allocated for the user agent
+                    port:
+                      type: integer
+                      description: The SIP port allocated tor the user agent
+                      default: 5060
+                    username:
+                      type: string
+                      description: The SIP username to use for authentication
+                    password:
+                      type: string
+                      description: The SIP password to use for authentication
+                    transport:
+                      type: string
+                      default: tls
+                      enum:
+                        - tcp
+                        - udp
+                        - tls
+                        - wss
+              metadata:
+                type: object
+                description: Subscriber profile metadata, to be stored in the application for laster usage
+                properties:
+                  language:
+                    type: string
+                    enum:
+                      - en
+                      - ru
+                      - fr
+                      - de
+                  subscriber_id:
+                    type: integer
+                    description: The subscribers numerical ID in the system
+                  billing_profile_id:
+                    type: integer
+                    description: The subscriber billing profile ID (the subscriber callplan)
+                  features:
+                    type: array
+                    description: A features array - describing enabled features and therir current configruation
+                    items:
+                      type: object
+                      description: A feature meta deta description
+                      properties:
+                        code:
+                          type: string
+                          description: The feature code with the application
+                        config:
+                          type: string
+                          description: A JSON encoded string, representing the feature configuration metadata
+        500:
+          description: Unexpected error
+        404:
+          description: User not found, disabled or otherwise made "invisible" to the service
+        403:
+          description: User not authorized
+    put:
+      summary: |
+        Refresh my session with the server side - taken the token from the HTTP Header
+      description: |
+        All requests from the mobile application to the User Agent Middleware API should be pre-authorized. Authorization shall be based upon a JWT interface (www.jwt.io).
+      produces:
+        - application/json
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Session refreshed successfullly
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /auth/sms/send/{ts}:
+    post:
+      summary: |
+        Send an SMS verification message to the phone
+      description: |
+        All requests from the mobile application to the User Agent Middleware API should be pre-authorized. Authorization shall be based upon a JWT interface (www.jwt.io).
+      consumes:
+        - application/json
+      parameters:
+        - name: "ts"
+          in: "path"
+          description: "Request timestamp, in EPOCH format"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: body
+          in: body
+          description: |
+          schema:
+            type: object
+            properties:
+              msisdn:
+                type: string
+                description: The devices phone number, to send the SMS activation code to
+          required:
+            true
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Action Code had been queued for sending
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /auth/sms/verify/{action_code}:
+    post:
+      summary: |
+        Submit the SMS for verification with the remote system
+      description: |
+        All requests from the mobile application to the User Agent Middleware API should be pre-authorized. Authorization shall be based upon a JWT interface (www.jwt.io).
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "action_code"
+          in: "path"
+          description: "The previously received action code, via SMS"
+          required: true
+          type: "string"
+          format: "string"
+        - name: body
+          in: body
+          description: |
+          schema:
+            type: object
+            properties:
+              msisdn:
+                type: string
+                description: The devices phone number, to send the SMS activation code to
+          required:
+            true
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: The SMS code had been validated
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /auth/email/send/{ts}:
+    post:
+      summary: |
+        Send an verification message to the email address
+      description: |
+        All requests from the mobile application to the User Agent Middleware
+        API should be pre-authorized. Authorization shall be based upon a JWT
+        interface (www.jwt.io).
+      consumes:
+        - application/json
+      parameters:
+        - name: ts
+          in: path
+          description: 'Request timestamp, in EPOCH format'
+          required: true
+          type: integer
+          format: int64
+        - name: body
+          in: body
+          description: ''
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                description: 'The email address, to send the SMS activation code to'
+          required: true
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        '202':
+          description: Action Code had been queued for sending
+        '403':
+          description: User not authorized
+        '404':
+          description: Not found
+        '500':
+          description: Unexpected error
+  /auth/email/verify/{action_code}:
+    post:
+      summary: |
+        Submit the activation code in email for verification with the remote
+        system
+      description: |
+        All requests from the mobile application to the User Agent Middleware
+        API should be pre-authorized. Authorization shall be based upon a JWT
+        interface (www.jwt.io).
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: action_code
+          in: path
+          description: 'The previously received action code, via email'
+          required: true
+          type: string
+          format: string
+        - name: body
+          in: body
+          description: ''
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                description: 'The email address, to send the activation code to'
+          required: true
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        '202':
+          description: The action code had been validated
+        '403':
+          description: User not authorized
+        '404':
+          description: Not found
+        '500':
+          description: Unexpected error
+  /subscriber:
+    post:
+      summary: |
+        Register a new subscriber with the service
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          description: |
+          schema:
+            type: object
+            properties:
+              callerid:
+                type: string
+                description: The caller ID of the originating phone
+              password:
+                type: string
+                description: The caller ID of the originating phone
+              metadata:
+                type: object
+                description: Mobile operating system information
+                properties:
+                  first_name:
+                    type: string
+                    description: The caller ID of the originating phone
+                  last_name:
+                    type: string
+                    description: The caller ID of the originating phone
+                  language:
+                    type: string
+                    description: The caller ID of the originating phone
+                    enum:
+                      - en
+                      - ru
+                      - fr
+                  os_name:
+                    type: string
+                    description: Operating system name
+                    enum:
+                      - android
+                      - ios
+                      - windows
+                      - other
+                  os_version:
+                    type: string
+                    description: Operating system version information
+                  device:
+                    type: string
+                    description: Device identification
+          required:
+            true
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: A response object, describing the information obtained from the platform management system.
+          schema:
+            type: object
+            properties:
+              sip_credentials:
+                type: array
+                description: An array of server objects, to enable fail over and remote registration alternatives
+                items:
+                  type: object
+                  description: An object describing SIP registration data
+                  properties:
+                    server:
+                      type: string
+                      description: The SIP server allocated for the user agent
+                    port:
+                      type: integer
+                      description: The SIP port allocated tor the user agent
+                      default: 5060
+                    username:
+                      type: string
+                      description: The SIP username to use for authentication
+                    password:
+                      type: string
+                      description: The SIP password to use for authentication
+                    transport:
+                      type: string
+                      default: tls
+                      enum:
+                        - tcp
+                        - udp
+                        - tls
+                        - wss
+              metadata:
+                type: object
+                description: Subscriber profile metadata, to be stored in the application for laster usage
+                properties:
+                  language:
+                    type: string
+                    enum:
+                      - en
+                      - ru
+                      - fr
+                      - de
+                  subscriber_id:
+                    type: integer
+                    description: The subscribers numerical ID in the system
+                  billing_profile_id:
+                    type: integer
+                    description: The subscriber billing profile ID (the subscriber callplan)
+                  features:
+                    type: array
+                    description: A features array - describing enabled features and therir current configruation
+                    items:
+                      type: object
+                      description: A feature meta deta description
+                      properties:
+                        code:
+                          type: string
+                          description: The feature code with the application
+                        config:
+                          type: string
+                          description: A JSON encoded string, representing the feature configuration metadata
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber_username}:
+    get:
+      summary: |
+        Get the subscribers profile and related information
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber_username"
+          in: "path"
+          description: "The subscriber username"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The subscribers information as stored in the system
+          schema:
+            type: object
+            properties:
+              sip_credentials:
+                type: array
+                description: An array of server objects, to enable fail over and remote registration alternatives
+                items:
+                  type: object
+                  description: An object describing SIP registration data
+                  properties:
+                    server:
+                      type: string
+                      description: The SIP server allocated for the user agent
+                    port:
+                      type: integer
+                      description: The SIP port allocated tor the user agent
+                      default: 5060
+                    username:
+                      type: string
+                      description: The SIP username to use for authentication
+                    password:
+                      type: string
+                      description: The SIP password to use for authentication
+                    transport:
+                      type: string
+                      default: tls
+                      enum:
+                        - tcp
+                        - udp
+                        - tls
+                        - wss
+              metadata:
+                type: object
+                description: Subscriber profile metadata, to be stored in the application for laster usage
+                properties:
+                  language:
+                    type: string
+                    enum:
+                      - en
+                      - ru
+                      - fr
+                      - de
+                  subscriber_id:
+                    type: integer
+                    description: The subscribers numerical ID in the system
+                  billing_profile_id:
+                    type: integer
+                    description: The subscriber billing profile ID (the subscriber callplan)
+                  features:
+                    type: array
+                    description: A features array - describing enabled features and therir current configruation
+                    items:
+                      type: object
+                      description: A feature meta deta description
+                      properties:
+                        code:
+                          type: string
+                          description: The feature code with the application
+                        config:
+                          type: string
+                          description: A JSON encoded string, representing the feature configuration metadata
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+    delete:
+      summary: |
+        Remove the subscribers' profile from the system
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber_username"
+          in: "path"
+          description: "The subscriber username"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Subscriber profile had been queued for removal
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+    put:
+      summary: |
+        Update the subscriber information
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber_username"
+          in: "path"
+          description: "The subscriber username"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: body
+          in: body
+          description: |
+          schema:
+            type: object
+            properties:
+              callerid:
+                type: string
+                description: The caller ID of the originating phone
+              password:
+                type: string
+                description: The caller ID of the originating phone
+              metadata:
+                type: object
+                description: Mobile operating system information
+                properties:
+                  first_name:
+                    type: string
+                    description: The caller ID of the originating phone
+                  last_name:
+                    type: string
+                    description: The caller ID of the originating phone
+                  language:
+                    type: string
+                    description: The caller ID of the originating phone
+                    enum:
+                      - en
+                      - ru
+                      - fr
+                  os_name:
+                    type: string
+                    description: Operating system name
+                    enum:
+                      - android
+                      - ios
+                      - windows
+                      - other
+                  os_version:
+                    type: string
+                    description: Operating system version information
+                  device:
+                    type: string
+                    description: Device identification
+          required:
+            true
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The subscribers information as stored in the system
+          schema:
+            type: object
+            properties:
+              sip_credentials:
+                type: array
+                description: An array of server objects, to enable fail over and remote registration alternatives
+                items:
+                  type: object
+                  description: An object describing SIP registration data
+                  properties:
+                    server:
+                      type: string
+                      description: The SIP server allocated for the user agent
+                    port:
+                      type: integer
+                      description: The SIP port allocated tor the user agent
+                      default: 5060
+                    username:
+                      type: string
+                      description: The SIP username to use for authentication
+                    password:
+                      type: string
+                      description: The SIP password to use for authentication
+                    transport:
+                      type: string
+                      default: tls
+                      enum:
+                        - tcp
+                        - udp
+                        - tls
+                        - wss
+              metadata:
+                type: object
+                description: Subscriber profile metadata, to be stored in the application for laster usage
+                properties:
+                  language:
+                    type: string
+                    enum:
+                      - en
+                      - ru
+                      - fr
+                      - de
+                  subscriber_id:
+                    type: integer
+                    description: The subscribers numerical ID in the system
+                  billing_profile_id:
+                    type: integer
+                    description: The subscriber billing profile ID (the subscriber callplan)
+                  features:
+                    type: array
+                    description: A features array - describing enabled features and therir current configruation
+                    items:
+                      type: object
+                      description: A feature meta deta description
+                      properties:
+                        code:
+                          type: string
+                          description: The feature code with the application
+                        config:
+                          type: string
+                          description: A JSON encoded string, representing the feature configuration metadata
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /balance/{subscriber_username}:
+    get:
+      summary: |
+        Get the subscribers current balance
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber_username"
+          in: "path"
+          description: "The subscriber username"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The subscribers credit information
+          schema:
+            type: object
+            properties:
+              balance:
+                type: number
+                format: float
+                description: The subscribers current balance
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /payment/{subscriber}:
+    post:
+      summary:
+        Send a payment request to the billing system for processing
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: body
+          in: body
+          description: |
+          schema:
+            type: object
+            properties:
+              callerid:
+                type: string
+                description: The caller ID of the originating phone
+          required:
+            true
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The subscribers credit information
+          schema:
+            type: object
+            properties:
+              balance:
+                type: number
+                format: float
+                description: The subscribers current balance
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+    get:
+      summary:
+        Get the list of previous payments and their status
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The list of previously allocted payments
+          schema:
+            type: array
+            description: An array of payment objects, as completed by the platform
+            items:
+              type: object
+              description: A payment object
+              properties:
+                timestamp:
+                  type: integer
+                  format: integer
+                  description: The timestamp of the payment, in EPOCH format
+                amount:
+                  type: integer
+                  format: integer
+                  description: The amount paid in USD
+                status:
+                  type: string
+                  description: The payment status
+                  enum:
+                    - success
+                    - failed
+                    - rejected
+                    - blacklisted
+                type:
+                  description: The SIP password to use for authentication
+                  type: string
+                  enum:
+                    - inapp
+                    - callcenter
+                    - portal
+                    - voucher
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/artifact/submit:
+    post:
+      summary:
+        Submit an artifact to be saved with the subscribers profile
+      description: |
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: Artifact uploaded successfully and queued for processing
+          schema:
+            type: object
+            properties:
+              artifact_id:
+                type: number
+                format: integer
+                description: ID of the uploaded artifact
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/artifact/{artifact_id}:
+    get:
+      summary:
+        Get an artifact from the subscribers artifact storage
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - image/jpeg
+        - image/gif
+        - image/tiff
+        - image/png
+        - 'audio/*'
+        - 'video/*'
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: "artifact_id"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Artifact is loaded in payload
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+    delete:
+      summary:
+        Delete an artifact from the subscribers artifact storage
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - image/jpeg
+        - image/gif
+        - image/tiff
+        - image/png
+        - 'audio/*'
+        - 'video/*'
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: "artifact_id"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: Artifact queued for deletion
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/calls:
+    get:
+      summary: |
+        Get a list of the subscribers calls from the platform.
+      description: |
+        The overall query string should look like the following:
+        &lt;br/&gt;&lt;br/&gt;
+        ```
+        subscriber/{subscriber}/calls?start={start_timestamp}&amp;end={end_timestamp}
+        ```
+        &lt;br/&gt;
+        **Pay Attention**&lt;br/&gt;
+        {start_timestamp} is mandatory&lt;br/&gt;
+        {end_timestamp} is optional - if not defined, search will be performed from start_timestamp till current time.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "start"
+          in: "query"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: "end"
+          in: "query"
+          description: "subscriber ID"
+          required: false
+          type: "integer"
+          format: "int64"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The subscribers call records
+          schema:
+            type: object
+            properties:
+              endpoints:
+                type: array
+                description: A list of currently stored calls and their associated data
+                items:
+                  type: object
+                  properties:
+                    destination:
+                      type: string
+                      format: string
+                      description: The destination called
+                    disposition:
+                      type: string
+                      description: What was the disposition of the call
+                      enum:
+                        - ANSWER
+                        - NOANSWER
+                        - BUSY
+                        - CANCEL
+                    timestamp:
+                      type: integer
+                      format: int64
+                      description: Timestamp of the call, in EPOCH format
+                    duration:
+                      type: integer
+                      format: int64
+                      description: Duration of the call in seconds
+                    charge:
+                      type: integer
+                      format: int64
+                      description: If the call was successful, what was the charge, this will include the call duration.
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/call/{call_id}:
+    get:
+      summary:
+        Get a specific call records from the platform
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "call_id"
+          in: "path"
+          description: "call ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The subscribers call records
+          schema:
+            type: object
+            properties:
+              endpoints:
+                type: array
+                description: A list of currently stored calls and their associated data
+                items:
+                  type: object
+                  properties:
+                    destination:
+                      type: string
+                      format: string
+                      description: The destination called
+                    disposition:
+                      type: string
+                      description: What was the disposition of the call
+                      enum:
+                        - ANSWER
+                        - NOANSWER
+                        - BUSY
+                        - CANCEL
+                    timestamp:
+                      type: integer
+                      format: int64
+                      description: Timestamp of the call, in EPOCH format
+                    duration:
+                      type: integer
+                      format: int64
+                      description: Duration of the call in seconds
+                    charge:
+                      type: integer
+                      format: int64
+                      description: If the call was successful, what was the charge, this will include the call duration.
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/get_rate/{phone_number}:
+    get:
+      summary:
+        Get the rate for a specific phone number or a country prefix
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: "phone_number"
+          in: "path"
+          description: "The number we would like to query, or a country prefix"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The allocated call rates
+          schema:
+            type: object
+            properties:
+              country_code:
+                type: string
+                format: string
+                description: Destination country code
+              country_prefix:
+                type: string
+                format: string
+                description: Country code according to ITU
+              dial_prefix:
+                type: string
+                format: string
+                description: The identified prefix, according to the {phone_number}
+              charge:
+                type: number
+                format: float
+                description: The charge per minute for the provided {phone_number}
+
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/feedback:
+    post:
+      summary:
+        Submit a feedback to server
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: body
+          in: body
+          description: |
+          schema:
+            type: object
+            properties:
+              subject:
+                type: string
+                description: Subject of the feedback
+              content:
+                type: string
+                description: Content of the feedback
+          required:
+            true
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: Feedback sent successfully
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/did:
+    post:
+      summary:
+        Allocate a DID number for the subscriber
+      description: |
+        Allocation of a DID number shall always be performed according to the following procedure:&lt;br/&gt;
+        * Client will issue a DID allocation request
+        * Client will present the DID allocation to the subscriber
+        * If user declines the DID allocation, the DID will be released and a new DID will be allocated as required.
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The DID allocation response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/did/{did_number}:
+    delete:
+      summary:
+        Release a specific DID number from the subscribers profile
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+        - name: "did_number"
+          in: "path"
+          description: "DID number to release"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: The DID had been released
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/forward/{did_number}/all:
+    post:
+      summary:
+        Forward all calls to a new destination
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              destination:
+                type: string
+                format: string
+                description: Where should the call be forwarded to, in E164 format
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "did_number"
+          in: "path"
+          description: "The did number to assign a call forwarding destination"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Forwarding had been setup successfully.
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/forward/{did_number}/busy:
+    post:
+      summary:
+        Forward new destination, in case the phone is busy
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              destination:
+                type: string
+                format: string
+                description: Where should the call be forwarded to, in E164 format
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "did_number"
+          in: "path"
+          description: "The did number to assign a call forwarding destination"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Forwarding had been setup successfully.
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/forward/{did_number}/noanswer:
+    post:
+      summary:
+        Forward new destination, in case the phone has not answered
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              destination:
+                type: string
+                format: string
+                description: Where should the call be forwarded to, in E164 format
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "did_number"
+          in: "path"
+          description: "The did number to assign a call forwarding destination"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Forwarding had been setup successfully.
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/forward/{did_number}:
+    delete:
+      summary:
+        Disable call forwarding completely.
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "did_number"
+          in: "path"
+          description: "The did number to assign a call forwarding destination"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Forwarding had been disabled successfully.
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/decline/{call_id}/handler/{handler_id}:
+    delete:
+      summary:
+        Decline an inbound call push notification
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "call_id"
+          in: "path"
+          description: "call ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "handler_id"
+          in: "path"
+          description: "The IP/FQDN of the server handling the call"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Call had been declined successfully
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized
+  /subscriber/{subscriber}/callerid:
+    delete:
+      summary:
+        Disable the sending of the subscriber CallerID to the receiving party
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: CallerID status had been modified
+        500:
+          description: Unexpected error
+        404:
+          description: No User found or invalid information supplied
+        403:
+          description: User not authorized
+    put:
+      summary:
+        Set the subscriber's called ID to the one provided
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: body
+          in: body
+          description: |
+          schema:
+            type: object
+            properties:
+              callerid:
+                type: string
+                description: The caller ID to set
+          required:
+            true
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: CallerID status had been modified
+        500:
+          description: Unexpected error
+        404:
+          description: No User found or invalid information supplied
+        403:
+          description: User not authorized
+  /call/bridge/{subscriber}/{bridge_id}/{channel_id}:
+    post:
+      summary:
+        Connect {channel_id} to {bridge_id}
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "bridge_id"
+          in: "path"
+          description: "Bridge ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "channel_id"
+          in: "path"
+          description: "Channel ID"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Channel Connected to Bridge
+        500:
+          description: Unexpected error
+        404:
+          description: No User found or invalid information supplied
+        403:
+          description: User not authorized
+    delete:
+      summary:
+        Disconnect {channel_id} from {bridge_id} and detory {channel_id}
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "bridge_id"
+          in: "path"
+          description: "Bridge ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "channel_id"
+          in: "path"
+          description: "Channel ID"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Channel had been queued for disconnection
+        500:
+          description: Unexpected error
+        404:
+          description: No User found or invalid information supplied
+        403:
+          description: User not authorized
+  /call/bridge/{subscriber}/{bridge_id}:
+    delete:
+      summary:
+        Destroy a bridge, disconnecting all channels connected to it
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "bridge_id"
+          in: "path"
+          description: "Bridge ID"
+          required: true
+          type: string
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        202:
+          description: Bridge had been queued for destruction.
+        500:
+          description: Unexpected error
+        404:
+          description: No User found or invalid information supplied
+        403:
+          description: User not authorized
+  /call/{subscriber}/{session_id}:
+    get:
+      summary: |
+        Get the metadata for the call, indicated by {session_id}
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "string"
+          format: "string"
+        - name: "session_id"
+          in: "path"
+          description: "Call unique session ID"
+          required: true
+          type: "string"
+          format: "string"
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The meta data object that is associated with the session indicated by {session_id}
+          schema:
+            type: object
+            properties:
+              bridge_id:
+                type: string
+                description: The call's bridge identifier
+                format: string
+              channel_id:
+                type: string
+                description: The call's channel identifier
+                format: string
+              handler_id:
+                type: string
+                description: The Vapp server serving the call
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: No User found or invalid information supplied
+        403:
+          description: User not authorized
+  /app/{os_name}/{os_version}/version:
+    get:
+      summary:
+        Get latest application version in app store
+      description: |
+      produces:
+        - application/json
+      parameters:
+        - name: "os_name"
+          in: "path"
+          description: "mobile operating system name"
+          required: true
+          type: string
+          enum:
+            - android
+            - ios
+            - windows
+            - other
+        - name: "os_version"
+          in: "path"
+          description: "mobile operating system version"
+          required: true
+          type: string
+      tags:
+        - USERAGENT MIDDLEWARE
+      responses:
+        200:
+          description: The version number of latest application
+          schema:
+            type: object
+            properties:
+              version:
+                type: string
+                format: string
+                description: Latest version number
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: User not authorized

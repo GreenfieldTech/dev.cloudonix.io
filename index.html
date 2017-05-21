@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<!--[if IE 8]>
+<html lang="en" class="ie8"> <![endif]-->
+<!--[if IE 9]>
+<html lang="en" class="ie9"> <![endif]-->
+<!--[if !IE]><!-->
+<html lang="en"> <!--<![endif]-->
+<head>
+    <title>Cloudonix.io - Developer Documentation</title>
+    <!-- Meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="favicon.ico">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800'
+          rel='stylesheet' type='text/css'>
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="assets/plugins/bootstrap/css/bootstrap.min.css">
+    <!-- Plugins CSS -->
+    <link rel="stylesheet" href="assets/plugins/font-awesome/css/font-awesome.css">
+    <link rel="stylesheet" href="assets/plugins/prism/prism.css">
+    <link rel="stylesheet" href="assets/plugins/elegant_font/css/style.css">
+
+    <!-- Swagger -->
+    <link rel="stylesheet" type="text/css" href="assets/swagger-ui.css">
+
+    <!-- Theme CSS -->
+    <link id="theme-style" rel="stylesheet" href="assets/css/styles.css">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body class="body-green">
+
+<div class="page-wrapper">
+    <header id="header" class="header">
+        <div class="container">
+            <div class="branding">
+                <h1 class="logo">
+                    <a href="index.html">
+                        <span aria-hidden="true" class="icon_documents_alt icon"></span>
+                        <span class="text-highlight">dev.</span><span class="text-bold">cloudonix.io</span>
+                    </a>
+                </h1>
+            </div><!--//branding-->
+        </div><!--//container-->
+    </header><!--//header-->
+
+    <div class="doc-wrapper" style="min-height: 100%;">
+        <div class="container">
+            <!--
+            <div id="doc-header" class="doc-header text-center">
+                <h1 class="doc-title"><i class="icon fa fa-paper-plane"></i> Quick Start</h1>
+                <div class="meta"><i class="fa fa-clock-o"></i> Last updated: Jan 25th, 2016</div>
+            </div><!--//doc-header-->
+            <div class="doc-body">
+                <div class="doc-content">
+                    <div class="content-inner">
+                        <div id="general">
+                            <section id="general-section" class="doc-section">
+                                <h2 class="section-title">General</h2>
+                                <div class="section-block">
+                                    <p>
+                                        Welcome to the cloudonix.io developers portal. This portal contains API
+                                        documentation
+                                        and additional information, provided as a tool to assist cloudonix.io customers
+                                        to
+                                        develop their own cloudonix.io plugins and business logic.
+
+                                        Cloudonix.io follows a simple, straight forward, REST based API set - providing
+                                        access
+                                        to various elements of the platform to the developer.
+                                    </p>
+                                    <h3>Producers and Consumers</h3>
+                                    <p>
+                                        The platform includes various producer and consumer APIs. A consumer API
+                                        indicates
+                                        an API operating between an active application or process, with the customers
+                                        billing
+                                        or business logic. A producer API indicates an API meant primarily for
+                                        initiating
+                                        functions or manipulating data. <br/>
+                                        A classic consumer API shall be the <code>/call</code> API, initiated from the
+                                        Cloudonix
+                                        <strong>vapp</strong> server, to the customers external business logic. <br/>
+                                        A classic producer API shall be the <code>/provision</code> API, initiated from
+                                        the
+                                        customers business logic, to the Cloudonix provisioning API.
+                                    </p>
+                                    <h3>Error Handling</h3>
+                                    By default, all methods should return a 200/202 HTTP result code upon success, or a
+                                    4xx/5xx Error upon failure.<br/>
+                                    Errors should be formatted as following:
+                                    <pre class="language-javascript">{
+  "error_code:" 502,
+  "error_message": "Detailed error message"
+}</pre>
+                                    <h3>Empty Responses</h3>
+                                    Some APIs may return an empty result, accompanied with a 202 response. A 202 response
+                                    indicates that the request had completed successfully and no additional information is
+                                    provided in respect to this query, eg. A delete request.
+                                </div>
+                            </section><!--//doc-section-->
+                        </div>
+
+                        <div id="swagger-ui" style="display: none;"></div>
+                        <div id="general-ui" style="display: none;"></div>
+
+                    </div><!--//content-inner-->
+                </div><!--//doc-content-->
+                <div class="doc-sidebar hidden-xs">
+                    <nav id="doc-nav">
+                        <ul id="doc-menu" class="nav doc-menu" data-spy="affix">
+                            <li>
+                                <a onclick="display_general()">General</a>
+                            </li>
+                            <li>
+                                <a>Mobile SDKs and Apps</a>
+                                <ul class="nav doc-sub-menu">
+                                    <li><a class="nav doc-sub-menu" href="#swagger-ui"><strong>Android</strong></a>
+                                        <ul class="nav doc-sub-menu">
+                                            <li><a class="scrollto" href="#swagger-ui">Cloudonix SDK for Android</a></li>
+                                            <li><a class="scrollto" href="#swagger-ui">Reference App for Android</a></li>
+                                        </ul><!--//nav-->
+                                    </li>
+                                    <li><a class="nav doc-sub-menu" href="#swagger-ui"><strong>iOS</strong></a>
+                                        <ul class="nav doc-sub-menu">
+                                            <li><a class="scrollto" href="#swagger-ui">Cloudonix SDK for iOS</a></li>
+                                            <li><a class="scrollto" href="#swagger-ui">Reference App for iOS</a></li>
+                                        </ul><!--//nav-->
+                                    </li>
+                                </ul><!--//nav-->
+                            </li>
+                            <li>
+                                <a>Consumer APIs</a>
+                                <ul class="nav doc-sub-menu">
+                                    <li><a class="scrollto" href="#" onclick="display_swagger_topic('consumer_vapp.yaml')">Vapp API</a></li>
+                                </ul><!--//nav-->
+                            </li>
+                            <li>
+                                <a>Producer APIs</a>
+                                <ul class="nav doc-sub-menu">
+                                    <li><a class="scrollto" href="#" onclick="display_swagger_topic('producer_provisioning.yaml')">Provisioning API</a></li>
+                                </ul><!--//nav-->
+                            </li>
+                            <li>
+                                <a>Proposed APIs</a>
+                                <ul class="nav doc-sub-menu">
+                                    <li><a class="scrollto" href="#" onclick="display_swagger_topic('proposed_uam.yaml')">User Agent Middleware</a></li>
+                                </ul><!--//nav-->
+                            </li>
+                        </ul><!--//doc-menu-->
+                    </nav>
+                </div><!--//doc-sidebar-->
+            </div><!--//doc-body-->
+        </div><!--//container-->
+    </div><!--//doc-wrapper-->
+
+    <!--
+    <footer id="footer" class="footer text-center" >
+        <div class="container">
+            <small class="copyright">(c) 2017 Cloudonix.io - Cloudonix.io is a Trademark of Greenfield Tech Delivered.
+            </small>
+        </div>
+    </footer><!--//footer-->
+</div>
+
+<script src="assets/swagger-ui-bundle.js"></script>
+<script src="assets/swagger-ui-standalone-preset.js"></script>
+<script>
+    function display_swagger_topic(my_url) {
+
+        var getUrl = window.location;
+        var baseUrl = getUrl .protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
+
+        hide_me('general');
+        hide_me('general-ui');
+        show_me('swagger-ui');
+
+        // Build a system
+        const ui = SwaggerUIBundle({
+            url: baseUrl + "/docs/" + my_url,
+            dom_id: '#swagger-ui',
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "StandaloneLayout",
+            topbar: false
+        })
+
+        window.ui = ui;
+    }
+
+    function display_topic() {
+        hide_me('general');
+        show_me('general-ui');
+        hide_me('swagger-ui');
+    }
+
+    function display_general() {
+        show_me('general');
+        hide_me('general-ui');
+        hide_me('swagger-ui');
+    }
+
+    function hide_me(hide_me) {
+        var hide_me_var = document.getElementById(hide_me);
+
+        hide_me_var.style.display = 'none';
+    }
+
+    function show_me(show_me) {
+        var show_me_var = document.getElementById(show_me);
+
+        show_me_var.style.display = 'block';
+    }
+</script>
+
+<!-- Main Javascript -->
+<script type="text/javascript" src="assets/plugins/jquery-1.12.3.min.js"></script>
+<script type="text/javascript" src="assets/plugins/bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="assets/plugins/prism/prism.js"></script>
+<script type="text/javascript" src="assets/plugins/jquery-scrollTo/jquery.scrollTo.min.js"></script>
+<script type="text/javascript" src="assets/plugins/jquery-match-height/jquery.matchHeight-min.js"></script>
+<script type="text/javascript" src="assets/js/main.js"></script>
+
+</body>
+</html>
