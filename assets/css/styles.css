@@ -30,7 +30,7 @@ body {
   height: 50px;
 }
 .footer {
-  height: 50px;
+  height: 70px;
 }
 p {
   line-height: 1.5;
@@ -308,7 +308,7 @@ select {
 /* ====== Header ====== */
 .header {
   background: #494d55;
-  color: rgba(255, 255, 255, 0.85);
+  background-color: rgba(51, 71, 183, 0.25);
   border-top: 5px solid #40babd;
   padding: 30px 0;
 }
@@ -328,10 +328,11 @@ select {
   text-decoration: none;
 }
 .branding .text-highlight {
-  color: #40babd;
+  color: #31bd21;
+  font-weight: 800;
 }
 .body-green .branding .text-highlight {
-  color: #75c181;
+  color: #33c118;
 }
 .body-blue .branding .text-highlight {
   color: #58bbee;
@@ -350,7 +351,7 @@ select {
 }
 .branding .text-bold {
   font-weight: 800;
-  color: #fff;
+  color: #000000;
 }
 .branding .icon {
   font-size: 24px;
