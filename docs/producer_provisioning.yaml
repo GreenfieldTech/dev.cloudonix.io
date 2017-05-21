@@ -1,0 +1,694 @@
+swagger: '2.0'
+info:
+  title: Provisioning Producer API
+  description: |
+    The TENANT PROVISIONING is used to allow a remote management system to provision tenants, domains, subscribers and
+    trunks to the Cloudonix.io platform.
+    <br/>
+    All requests to the provisioning interface must first be authorized by the `/auth` API, to ensure authorized
+    access only.
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /provision/tenant:
+    post:
+      summary:
+        Provision a new tenant on the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - TENANT PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+    put:
+      summary:
+        Update an existing tenant on the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - TENANT PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+  /provision/tenant/{tenant_id}:
+    delete:
+      summary:
+        Delete a tenant from the system
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - TENANT PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+    get:
+      summary:
+        Get a tenants information from the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - TENANT PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+  /provision/domain:
+    post:
+      summary:
+        Provision a new domain on the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - DOMAIN PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+    put:
+      summary:
+        Update an existing domain on the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - DOMAIN PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+  /provision/domain/{domain_id}:
+    delete:
+      summary:
+        Delete a domain from the system
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - DOMAIN PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+    get:
+      summary:
+        Get a domains information from the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - DOMAIN PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+  /provision/subscriber:
+    post:
+      summary:
+        Provision a new subscriber on the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - SUBSCRIBER PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+    put:
+      summary:
+        Update an existing subscriber on the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - SUBSCRIBER PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+  /provision/subscriber/{subscriber_id}:
+    delete:
+      summary:
+        Delete a subscriber from the system
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - SUBSCRIBER PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+    get:
+      summary:
+        Get a subscribers information from the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "subscriber"
+          in: "path"
+          description: "subscriber ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - SUBSCRIBER PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+  /provision/trunk:
+    post:
+      summary:
+        Provision a new trunk on the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "trunk"
+          in: "path"
+          description: "trunk ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - TRUNK PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+    put:
+      summary:
+        Update an existing trunk on the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "trunk"
+          in: "path"
+          description: "trunk ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - TRUNK PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+  /provision/trunk/{trunk_id}:
+    delete:
+      summary:
+        Delete a trunk from the system
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "trunk"
+          in: "path"
+          description: "trunk ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - TRUNK PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!
+    get:
+      summary:
+        Get a trunks information from the system.
+      description: |
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              country:
+                type: string
+                description: The requested country for DID allocation
+          required: true
+        - name: "trunk"
+          in: "path"
+          description: "trunk ID"
+          required: true
+          type: "integer"
+          format: "int64"
+      tags:
+        - TRUNK PROVISIONING
+      responses:
+        200:
+          description: Tenant provisioning response
+          schema:
+            type: object
+            properties:
+              did_number:
+                type: string
+                description: The allocated DID number
+                format: string
+        500:
+          description: Unexpected error
+        404:
+          description: Not found
+        403:
+          description: Authorization failed!

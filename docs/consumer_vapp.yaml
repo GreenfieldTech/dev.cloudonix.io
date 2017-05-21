@@ -385,7 +385,7 @@ paths:
           description: User not authorized
       tags:
         - VAPP CONSUMER
-  /call/state/{session_id}/{state}:
+  /call/state/{session_id}:
     put:
       summary: |
         Notify the current state of the call, as it traverses the Vapp server
@@ -399,17 +399,30 @@ paths:
           required: true
           type: "string"
           format: "string"
-        - name: "state"
-          in: "path"
-          description: "The current call state"
-          required: true
-          type: "string"
-          enum:
-            - PREDIAL
-            - DIALING
-            - CONNECTED
-            - COMPLETED
-            - ERROR
+        - name: body
+          in: body
+          schema:
+            type: object
+            properties:
+              state:
+                description: "The current call state"
+                type: string
+                format: string
+                enum:
+                  - PREDIAL
+                  - DIALING
+                  - CONNECTED
+                  - COMPLETED
+                  - ERROR
+              timestamp:
+                description: "The state timestamp, as registered by the vapp server"
+                type: number
+                format: int64
+              vapp_ident:
+                description: "The identifier (or IP) of the vapp server generating the update"
+                type: string
+                format: string
+
       responses:
         202:
           description: State reported successfully.

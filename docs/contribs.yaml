@@ -1,0 +1,23 @@
+swagger: '2.0'
+info:
+  title: Corrections and Contributions
+  description: |
+    **Disclaimer: The information provided within these pages is subject to change without notice.**<br/>
+    *This means that while we take much effort into maintaining a backward compatible API, sometimes this is just
+    impossible to do. Thus, make sure to get updated from this page on a periodical base, so that you can make
+    sure you are using the latest API specification.*
+    <br/>
+    ## We welcome pull requests!<br/>
+    Yes, this may come as a shock to you, but if you believe that the information provided in these pages is wrong
+    or in some form lacking, you ara welcome to send us a pull request with your own corrections. <br/>
+    To do so, please go to our **github** repository and fork our project.<br/>
+    ### Submitting a pull request is simple<br/>
+    Once you had forked the project to your personal repository, you are welcome to submit a pull request via the
+    project repository repository page. Should your pull request prove valid, it may be approved as is - or we may
+    modify it slightly for verbal/syntax/other compliance with our documentation.<br/>
+    ### We follow swagger<br/>
+    Documentation contributions may be provided as YAML files, that conform to the Swagger specification. Please head
+    over to [Swagger.io](http://swagger.io) for additional information about the Swagger specification.
+consumes:
+produces:
+paths:

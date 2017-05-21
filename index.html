@@ -102,8 +102,10 @@
   "error_message": "Detailed error message"
 }</pre>
                                     <h3>Empty Responses</h3>
-                                    Some APIs may return an empty result, accompanied with a 202 response. A 202 response
-                                    indicates that the request had completed successfully and no additional information is
+                                    Some APIs may return an empty result, accompanied with a 202 response. A 202
+                                    response
+                                    indicates that the request had completed successfully and no additional information
+                                    is
                                     provided in respect to this query, eg. A delete request.
                                 </div>
                             </section><!--//doc-section-->
@@ -118,15 +120,17 @@
                     <nav id="doc-nav">
                         <ul id="doc-menu" class="nav doc-menu" data-spy="affix">
                             <li>
-                                <a onclick="display_general()">General</a>
+                                <a class="scrollto" href="#" onclick="display_general()">General</a>
                             </li>
                             <li>
                                 <a>Mobile SDKs and Apps</a>
                                 <ul class="nav doc-sub-menu">
                                     <li><a class="nav doc-sub-menu" href="#swagger-ui"><strong>Android</strong></a>
                                         <ul class="nav doc-sub-menu">
-                                            <li><a class="scrollto" href="#swagger-ui">Cloudonix SDK for Android</a></li>
-                                            <li><a class="scrollto" href="#swagger-ui">Reference App for Android</a></li>
+                                            <li><a class="scrollto" href="#swagger-ui">Cloudonix SDK for Android</a>
+                                            </li>
+                                            <li><a class="scrollto" href="#swagger-ui">Reference App for Android</a>
+                                            </li>
                                         </ul><!--//nav-->
                                     </li>
                                     <li><a class="nav doc-sub-menu" href="#swagger-ui"><strong>iOS</strong></a>
@@ -140,20 +144,29 @@
                             <li>
                                 <a>Consumer APIs</a>
                                 <ul class="nav doc-sub-menu">
-                                    <li><a class="scrollto" href="#" onclick="display_swagger_topic('consumer_vapp.yaml')">Vapp API</a></li>
+                                    <li><a class="scrollto" href="#"
+                                           onclick="display_swagger_topic('consumer_vapp.yaml')">Vapp API</a></li>
                                 </ul><!--//nav-->
                             </li>
                             <li>
                                 <a>Producer APIs</a>
                                 <ul class="nav doc-sub-menu">
-                                    <li><a class="scrollto" href="#" onclick="display_swagger_topic('producer_provisioning.yaml')">Provisioning API</a></li>
+                                    <li><a class="scrollto" href="#"
+                                           onclick="display_swagger_topic('producer_provisioning.yaml')">Provisioning
+                                        API</a></li>
                                 </ul><!--//nav-->
                             </li>
                             <li>
                                 <a>Proposed APIs</a>
                                 <ul class="nav doc-sub-menu">
-                                    <li><a class="scrollto" href="#" onclick="display_swagger_topic('proposed_uam.yaml')">User Agent Middleware</a></li>
+                                    <li><a class="scrollto" href="#"
+                                           onclick="display_swagger_topic('proposed_uam.yaml')">User Agent
+                                        Middleware</a></li>
                                 </ul><!--//nav-->
+                            </li>
+                            <li>
+                                <a class="scrollto" href="#" onclick="display_swagger_topic('contribs.yaml')">Corrections
+                                    and Contributions</a>
                             </li>
                         </ul><!--//doc-menu-->
                     </nav>
@@ -161,6 +174,11 @@
             </div><!--//doc-body-->
         </div><!--//container-->
     </div><!--//doc-wrapper-->
+
+    <div id="footer" class="footer text-center">
+        This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-nd/4.0/">Creative
+        Commons Attribution-NonCommercial-NoDerivatives 4.0 International License</a>.
+    </div>
 
     <!--
     <footer id="footer" class="footer text-center" >
@@ -177,7 +195,7 @@
     function display_swagger_topic(my_url) {
 
         var getUrl = window.location;
-        var baseUrl = getUrl .protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
+        var baseUrl = getUrl.protocol + "//" + getUrl.host + "/" + getUrl.pathname.split('/')[1];
 
         hide_me('general');
         hide_me('general-ui');
